@@ -11,6 +11,7 @@ class Grid:
         self.grid = []
         self.generate_grid()
         self.count_alive_neighbors()
+        self.age = 0
 
     # Counting alive neighbors
     def count_neighbors(self):
@@ -22,10 +23,11 @@ class Grid:
             self.neighbors_alive[pos] = count
 
     def generate_grid(self):
-        self.grid = [[random.choice([True, False]) for j in range(self.grid_size[1])] for i in range(self.grid_size[0])]
+        self.grid = [[random.choice([True, False]) for _ in range(self.grid_size[1])] for _ in range(self.grid_size[0])]
 
     # Game rules
     def update_grid(self):
+        self.age += 1
         for row in range(self.grid_size[0]):
             for column in range(self.grid_size[1]):
                 if self.grid[row][column]:
@@ -61,12 +63,16 @@ class GameApp:
     def __init__(self, grid):
         pygame.init()
         self.clock = pygame.time.Clock()
-        self.max_fps = 144
-        self.screen = pygame.display.set_mode((grid.grid_size[1] * grid.cell_size, grid.grid_size[0] * grid.cell_size),
-                                              pygame.RESIZABLE)
+        self.max_fps = 60
+        self.screen = pygame.display.set_mode(
+            (grid.grid_size[1] * grid.cell_size,
+             grid.grid_size[0] * grid.cell_size),
+            pygame.RESIZABLE
+        )
         self.running = True
         self.pause = False
         self.leftMouse_down = False
+        self.font = pygame.font.SysFont("Arial", 30)
 
     # Draw the grid
     def draw(self, grid):
@@ -78,9 +84,13 @@ class GameApp:
                 color = (0, 0, 0)
                 # Color cell if it is alive
                 if grid.grid[row][column]:
-                    color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+                    color = (random.randint(0, 255),
+                             random.randint(0, 255),
+                             random.randint(0, 255))
                 # Draw the cell as a rectangle
                 pygame.draw.rect(self.screen, color, (x, y, grid.cell_size, grid.cell_size), 1)
+        text = self.font.render(str(grid.age), True, (255, 255, 255))
+        self.screen.blit(text, (0, 0))
         pygame.display.update()
 
     # Function to toggle a cell
